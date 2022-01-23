@@ -4,7 +4,17 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/Spuxy/snitchify/todo"
 )
+
+// Project contains the project level configuration
+type Project struct {
+	// Title         *TitleConfig
+	Keywords      []string
+	BodySeparator string
+	Remote        string
+}
 
 var AllowedParams [2]string = [2]string{"reported", "unreported"}
 var PredeclaredParams map[string]string = map[string]string{"unreportred": "", "reported": ""}
@@ -15,13 +25,18 @@ func main() {
 	if len(rslt) > 1 {
 		switch os.Args[1] {
 		case "list":
-			sanitzedParam, err := sanitaze(os.Args[2:]) // all args from position 2 until the end exlueing
+			sanitzedParam, err := sanitaze(os.Args[2:]) // all args from position 3 until the end exlueing
 			throwError(err)
 			params, err := parse(sanitzedParam, AllowedParams)
 			throwError(err)
 			fmt.Println(params["reported"])
 			_, isReported := params["reported"]
 			_, isUnreported := params["unreported"]
+			fmt.Println(isReported)
+			fmt.Println(isUnreported)
+		case "report":
+			file := os.Args[2:]
+			todo.GetTodosFromFile(file[0])
 		}
 	}
 }
@@ -54,7 +69,7 @@ func sanitaze(flags []string) ([]string, error) {
 			currentFlag = flag[2:] // 2 bytes of sting equels --
 			sanitzedParams = append(sanitzedParams, currentFlag)
 		} else if strings.HasPrefix(flag, "-") {
-			currentFlag = flag[1:] // 1 bytes of sting equels --
+			currentFlag = flag[1:] // 1 bytes of sting equels -
 			sanitzedParams = append(sanitzedParams, currentFlag)
 		} else {
 			return []string{}, fmt.Errorf("Flag has to be declared by - or --")
