@@ -1,6 +1,6 @@
 <?php
-// TODO: "HELLO"
-//TODO: "KELLO"
+// DONE:"HELLO"
+//DONE:"KELLO"
 class pepap {
     const G = "john";
 }

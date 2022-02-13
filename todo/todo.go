@@ -22,7 +22,8 @@ func New(d string, f string, l int) Todo {
 }
 
 func GetTodosFromFile(file string) {
-	var g github.Github = github.Github{TOKEN: "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"}
+	// HACK: Added token
+	var g github.Github = github.Github{TOKEN: "token"}
 	var lineNumber int
 	var numberLineToScan []int
 	fileFullContent, err := os.ReadFile(file)
@@ -51,6 +52,9 @@ func GetTodosFromFile(file string) {
 
 			issue := map[string]interface{}{"title": "issue " + todo, "body": todo}
 			_, err := g.SendReq("POST", "https://api.github.com/repos/Spuxy/snitchify/issues", issue)
+			// r, err := g.SendReq("GET", "https://api.github.com/users/Spuxy/repos", &map[string]interface{}{})
+			// fmt.Println(r)
+
 			if err != nil {
 				fmt.Println("Request Error: ", err.Error())
 			}
@@ -65,6 +69,9 @@ func GetTodosFromFile(file string) {
 		log.Fatal(err)
 	}
 
+	// remove file
+	os.Remove(file)
+
 	// create file
 	createdFile, err := os.Create(file)
 	defer createdFile.Close()
@@ -73,19 +80,17 @@ func GetTodosFromFile(file string) {
 	}
 	fmt.Println(string(fileFullContent))
 	createdFile.WriteString(string(fileFullContent))
-
-	// remove file
-	os.Remove(file)
 }
 
 // return whole content file in string
 func replaceTodo(fileName string, todo string, fileFullContentv2 []byte) []byte {
 	// fileFullContent, _ := os.ReadFile(fileName)
-	rg, err := regexp.Compile("^(.*)TODO(O*): " + todo)
+	// rg, err := regexp.Compile(`^(.*)TODO(O*): ` + regexp.QuoteMeta(todo))
+	rg, err := regexp.Compile("TODO: (?s)")
 	if err != nil {
 		fmt.Println("error: ", err.Error())
 	}
-	return rg.ReplaceAll(fileFullContentv2, []byte("DONE"))
+	return rg.ReplaceAll(fileFullContentv2, []byte("DONE:"))
 }
 
 func findByReg(line string) bool {
